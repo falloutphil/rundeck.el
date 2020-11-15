@@ -1,4 +1,4 @@
-;;; rundeck.el --- Render Rundeck Metrics in Org Mode -*- lexical-binding: t; -*-
+;;; rundeck.el --- Render Rundeck Metrics in Org Mode -*- lexical-binding: t; coding: utf-8 -*-
 
 ;; Copyright (C) 2020 Philip Beadling
 
@@ -28,6 +28,7 @@
 ;;; Commentary:
 ;; Set Request Curl Options to contain --insecure to ignore SSL cert issues
 
+
 ;;; Code:
 (require 'request)
 (require 'json)
@@ -37,11 +38,14 @@
 (setq host "rundeck:4443")
 (setq addr (concat "https://" host))
 
+(defun tick-cross (val)
+  (if (string= val "t") "✔" "✖"))
+
 (defun convert-job-to-row (job-alist)
   "Convert alist to org table row."
   (message "job")
   (let-alist job-alist
-    (insert (format "| %s | [[%s][%s]] | %s | %s |\n" .group .href .name .enabled .scheduled))))
+    (insert (format "| %s | [[%s][%s]] | %s | %s |\n" .group .href .name (tick-cross .enabled) (tick-cross .scheduled)))))
 
 (defun format-table ()
   (previous-line)
