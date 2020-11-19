@@ -43,9 +43,23 @@
 
 (defun convert-job-to-row (job-alist)
   "Convert alist to org table row."
-  (message "job")
+  (message "row")
   (let-alist job-alist
     (insert (format "| %s | [[%s][%s]] | %s | %s |\n" .group .href .name (tick-cross .enabled) (tick-cross .scheduled)))))
+
+;; http://ergoemacs.org/emacs/elisp_parse_org_mode.html
+(defun convert-job-to-item (job-alist)
+  "Convert alist to an org todo list item."
+  (message "item")
+  (let-alist job-alist
+    (insert (format (concat
+                     "** [[%s][%s]]\n"
+                     ":PROPERTIES:\n"
+                     ":Enabled: %s\n"
+                     ":Scheduled: %s\n"
+                     ":END:\n")
+                    .href .name .enabled .scheduled))))
+
 
 (defun format-table ()
   (previous-line)
@@ -60,8 +74,9 @@
 
 (switch-to-buffer "Rundeck")
 (org-mode)
-(insert "| Group | Name | Enabled | Scheduled |\n")
-(insert "|-\n")
+;;(insert "| Group | Name | Enabled | Scheduled |\n")
+;;(insert "|-\n")
+(insert "* Parent Item\n")
 
 (let ((auth (nth 0 (auth-source-search :host host
                                        :requires '(user secret)))))
@@ -87,8 +102,9 @@
   :parser 'json-read
   :success (function*
             (lambda (&key data &allow-other-keys)
-              (mapc #'convert-job-to-row data)
-              (format-table))))
+              ;(mapc #'convert-job-to-row data)
+              (mapc #'convert-job-to-item data))))
+              ;(format-table))))
 
 (message "Rundeck Complete")
 (provide 'rundeck)
